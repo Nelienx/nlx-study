@@ -1,0 +1,3357 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta name="theme-color" content="#000000">
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.webmanifest">
+
+    <!-- iOS / iPadOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+    <meta
+        name="apple-mobile-web-app-title"
+        content="NLx Study"
+    >
+
+    <!-- App Icon -->
+    <link rel="apple-touch-icon" href="./icon.svg">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+
+    <title>NLx - Nelox Study AI</title>
+
+    <!-- =====================================================
+         TAILWIND CSS CDN
+    ====================================================== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- =====================================================
+         LUCIDE ICONS CDN
+    ====================================================== -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- =====================================================
+         GOOGLE FONTS
+    ====================================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', 'Prompt', sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100,100,100,.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100,100,100,.5);
+        }
+
+        .modal-open {
+            overflow: hidden;
+        }
+
+        /* iPhone / iPad safe area */
+        .safe-top {
+            padding-top: env(safe-area-inset-top);
+        }
+
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-[#0f0f11] text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
+
+<header class="bg-black text-white sticky top-0 z-30 shadow-xl border-b border-gray-800 safe-top">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+
+        <button
+            onclick="resetFilters()"
+            class="flex items-center gap-3 text-left"
+        >
+
+            <div class="text-3xl sm:text-4xl font-black tracking-tighter logo-text leading-none">
+                NLx
+            </div>
+
+            <div class="h-8 w-[2px] bg-gray-800 rounded-full hidden sm:block"></div>
+
+            <div class="hidden sm:flex flex-col justify-center">
+                <span class="text-xs sm:text-sm font-extrabold tracking-wider text-gray-100 uppercase logo-text">
+                    Nelox Study
+                </span>
+
+                <span class="text-[10px] sm:text-xs font-medium text-blue-400">
+                    Artificial Intelligence
+                </span>
+            </div>
+
+        </button>
+
+        <div class="flex items-center gap-2">
+
+            <button
+                id="pwa-install-btn"
+                onclick="installApp()"
+                class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-700 text-xs font-medium text-gray-200"
+            >
+                <i data-lucide="download" class="w-4 h-4 text-blue-400"></i>
+                <span data-i18n="installBtn">
+                    ติดตั้งแอป
+                </span>
+            </button>
+
+            <button
+                onclick="toggleLanguage()"
+                class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-800 text-xs font-semibold text-gray-300"
+            >
+                <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                <span id="current-lang-text">TH</span>
+            </button>
+
+            <button
+                onclick="toggleTheme()"
+                class="p-2 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300"
+                title="Toggle Theme"
+            >
+                <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+                <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-indigo-400"></i>
+            </button>
+
+            <button
+                onclick="openCourseModal()"
+                class="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs sm:text-sm shadow-lg shadow-blue-600/30"
+            >
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+
+                <span data-i18n="addCourseBtn" class="hidden sm:inline">
+                    เพิ่มวิชาเรียน
+                </span>
+            </button>
+
+        </div>
+    </div>
+</header>
+
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+    <!-- =====================================================
+         MOBILE INSTALL BANNER
+    ====================================================== -->
+
+    <div
+        id="mobile-pwa-banner"
+        class="sm:hidden bg-gradient-to-r from-blue-900/40 to-black border border-blue-800/50 rounded-xl p-3 flex items-center justify-between text-xs"
+    >
+
+        <div class="flex items-center gap-2.5">
+
+            <div class="p-2 bg-blue-600 text-white rounded-lg font-black text-sm">
+                NLx
+            </div>
+
+            <div>
+                <div class="font-semibold text-white">
+                    ติดตั้ง NLx ลงหน้าจอโฮม
+                </div>
+
+                <div
+                    class="text-gray-400 text-[11px]"
+                    data-i18n="pwaBannerSub"
+                >
+                    ใช้งานได้สะดวก รวดเร็ว แบบไม่ต้องเปิดเบราว์เซอร์
+                </div>
+            </div>
+
+        </div>
+
+        <button
+            onclick="installApp()"
+            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-xs"
+        >
+            <span data-i18n="pwaBannerBtn">
+                วิธีติดตั้ง
+            </span>
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <div class="lg:col-span-2 bg-white dark:bg-[#18181c] rounded-2xl p-5 sm:p-6 border border-gray-200 dark:border-[#2a2a30] shadow-sm">
+
+            <div class="flex items-center justify-between mb-4">
+
+                <h2 class="text-lg font-bold flex items-center gap-2">
+
+                    <i
+                        data-lucide="layout-dashboard"
+                        class="w-5 h-5 text-blue-500"
+                    ></i>
+
+                    <span data-i18n="dashboardTitle">
+                        ภาพรวมการเรียน
+                    </span>
+
+                </h2>
+
+                <span
+                    id="overall-badge"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300"
+                >
+                    0%
+                </span>
+
+            </div>
+
+
+            <div class="mb-6">
+
+                <div class="flex justify-between text-xs font-semibold mb-1.5">
+
+                    <span
+                        class="text-gray-500 dark:text-gray-400"
+                        data-i18n="overallProgressLabel"
+                    >
+                        ความก้าวหน้ารวมทั้งหมด
+                    </span>
+
+                    <span
+                        id="overall-percentage-text"
+                        class="text-blue-600 dark:text-blue-400"
+                    >
+                        0%
+                    </span>
+
+                </div>
+
+                <div class="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+
+                    <div
+                        id="overall-progress-bar"
+                        class="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-500"
+                        style="width:0%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-[#0f0f11] border border-gray-100 dark:border-gray-800">
+
+                    <div
+                        class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+                        data-i18n="statCourses"
+                    >
+                        วิชาทั้งหมด
+                    </div>
+
+                    <div
+                        id="stat-total-courses"
+                        class="text-xl sm:text-2xl font-bold"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="p-3.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+
+                    <div
+                        class="text-xs text-emerald-600 dark:text-emerald-400 mb-1"
+                        data-i18n="statCompleted"
+                    >
+                        เรียนเสร็จแล้ว
+                    </div>
+
+                    <div
+                        id="stat-completed-lessons"
+                        class="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="p-3.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
+
+                    <div
+                        class="text-xs text-amber-600 dark:text-amber-400 mb-1"
+                        data-i18n="statInProgress"
+                    >
+                        กำลังเรียนอยู่
+                    </div>
+
+                    <div
+                        id="stat-in-progress-lessons"
+                        class="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="p-3.5 rounded-xl bg-gray-100/70 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/40">
+
+                    <div
+                        class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+                        data-i18n="statNotStarted"
+                    >
+                        ยังไม่ได้เริ่ม
+                    </div>
+
+                    <div
+                        id="stat-not-started-lessons"
+                        class="text-xl sm:text-2xl font-bold text-gray-600 dark:text-gray-400"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DONUT CHART
+        ================================================== -->
+
+        <div class="bg-white dark:bg-[#18181c] rounded-2xl p-5 sm:p-6 border border-gray-200 dark:border-[#2a2a30] shadow-sm flex flex-col items-center">
+
+            <h3
+                class="text-sm font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider self-start"
+                data-i18n="chartTitle"
+            >
+                สัดส่วนสถานะบทเรียน
+            </h3>
+
+            <div class="relative w-40 h-40 flex items-center justify-center my-2">
+
+                <svg
+                    class="w-full h-full transform -rotate-90"
+                    viewBox="0 0 36 36"
+                >
+
+                    <path
+                        class="text-gray-200 dark:text-gray-800"
+                        stroke-width="3.8"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+
+                    <path
+                        id="chart-segment-not-started"
+                        class="text-gray-400 dark:text-gray-600"
+                        stroke-width="3.8"
+                        stroke-dasharray="0,100"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+
+                    <path
+                        id="chart-segment-in-progress"
+                        class="text-amber-500"
+                        stroke-width="3.8"
+                        stroke-dasharray="0,100"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+
+                    <path
+                        id="chart-segment-completed"
+                        class="text-emerald-500"
+                        stroke-width="3.8"
+                        stroke-dasharray="0,100"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+
+                </svg>
+
+
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+
+                    <span
+                        id="chart-total-count"
+                        class="text-2xl font-extrabold"
+                    >
+                        0
+                    </span>
+
+                    <span
+                        class="text-[10px] text-gray-500 dark:text-gray-400"
+                        data-i18n="chartTotalLabel"
+                    >
+                        บทเรียนทั้งหมด
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="flex items-center justify-center gap-4 text-xs mt-2 w-full pt-3 border-t border-gray-100 dark:border-gray-800">
+
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span data-i18n="legendCompleted">เสร็จแล้ว</span>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                    <span data-i18n="legendInProgress">กำลังเรียน</span>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                    <span data-i18n="legendNotStarted">ยังไม่เริ่ม</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#18181c] p-4 rounded-xl border border-gray-200 dark:border-[#2a2a30] shadow-sm">
+
+        <div class="relative flex-grow max-w-md">
+
+            <i
+                data-lucide="search"
+                class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            ></i>
+
+            <input
+                type="text"
+                id="search-input"
+                oninput="renderCourses()"
+                placeholder="ค้นหาวิชาเรียน รหัสวิชา..."
+                class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+            >
+
+        </div>
+
+
+        <div class="flex flex-wrap items-center gap-2">
+
+            <select
+                id="category-filter"
+                onchange="renderCourses()"
+                class="px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium"
+            >
+                <option value="ALL" data-i18n="optAllCategories">
+                    หมวดหมู่ทั้งหมด
+                </option>
+            </select>
+
+
+            <select
+                id="status-filter"
+                onchange="renderCourses()"
+                class="px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium"
+            >
+
+                <option value="ALL" data-i18n="optAllStatus">
+                    สถานะทั้งหมด
+                </option>
+
+                <option value="COMPLETED" data-i18n="optStatusCompleted">
+                    เรียนเสร็จสมบูรณ์
+                </option>
+
+                <option value="IN_PROGRESS" data-i18n="optStatusInProgress">
+                    กำลังเรียนอยู่
+                </option>
+
+                <option value="NOT_STARTED" data-i18n="optStatusNotStarted">
+                    ยังไม่ได้เริ่ม
+                </option>
+
+            </select>
+
+
+            <button
+                onclick="resetFilters()"
+                class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg"
+                title="Reset"
+            >
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COURSES
+    ====================================================== -->
+
+    <section>
+
+        <div
+            id="courses-grid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        ></div>
+
+
+        <div
+            id="empty-state"
+            class="hidden flex-col items-center justify-center py-16 text-center bg-white dark:bg-[#18181c] rounded-2xl border border-dashed border-gray-300 dark:border-gray-800"
+        >
+
+            <div class="w-16 h-16 bg-blue-50 dark:bg-blue-950/40 text-blue-500 rounded-full flex items-center justify-center mb-4">
+
+                <i
+                    data-lucide="book-open-check"
+                    class="w-8 h-8"
+                ></i>
+
+            </div>
+
+
+            <h3
+                class="text-base font-bold mb-1"
+                data-i18n="emptyTitle"
+            >
+                ไม่พบวิชาเรียน
+            </h3>
+
+
+            <p
+                class="text-xs text-gray-500 dark:text-gray-400 max-w-sm mb-4"
+                data-i18n="emptyDesc"
+            >
+                เริ่มเพิ่มวิชาเรียนของคุณเพื่อติดตามความก้าวหน้า
+            </p>
+
+
+            <button
+                onclick="openCourseModal()"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold"
+            >
+                <span data-i18n="emptyBtn">
+                    + เพิ่มวิชาใหม่
+                </span>
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- =========================================================
+     COURSE MODAL
+========================================================== -->
+
+<div
+    id="course-modal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+>
+
+    <div class="bg-white dark:bg-[#18181c] border border-gray-200 dark:border-[#2a2a30] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+
+        <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+
+            <h3
+                id="modal-title"
+                class="text-base font-bold flex items-center gap-2"
+            ></h3>
+
+            <button
+                onclick="closeCourseModal()"
+                class="text-gray-400 hover:text-gray-200"
+            >
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+        </div>
+
+
+        <form
+            id="course-form"
+            onsubmit="saveCourse(event)"
+            class="p-5 space-y-4"
+        >
+
+            <input type="hidden" id="course-id">
+
+
+            <div class="grid grid-cols-3 gap-3">
+
+                <div>
+
+                    <label
+                        class="block text-xs font-semibold mb-1"
+                        data-i18n="labelCode"
+                    >
+                        รหัสวิชา
+                    </label>
+
+                    <input
+                        type="text"
+                        id="course-code"
+                        required
+                        placeholder="AI101"
+                        class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                    >
+
+                </div>
+
+
+                <div class="col-span-2">
+
+                    <label
+                        class="block text-xs font-semibold mb-1"
+                        data-i18n="labelTitle"
+                    >
+                        ชื่อวิชา
+                    </label>
+
+                    <input
+                        type="text"
+                        id="course-title"
+                        required
+                        placeholder="Machine Learning"
+                        class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <div>
+
+                    <label
+                        class="block text-xs font-semibold mb-1"
+                        data-i18n="labelCategory"
+                    >
+                        หมวดหมู่
+                    </label>
+
+                    <input
+                        type="text"
+                        id="course-category"
+                        placeholder="AI, Math, Web"
+                        class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label
+                        class="block text-xs font-semibold mb-1"
+                        data-i18n="labelTargetDate"
+                    >
+                        กำหนดสอบ / เรียนจบ
+                    </label>
+
+                    <input
+                        type="date"
+                        id="course-target-date"
+                        class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label
+                    class="block text-xs font-semibold mb-1"
+                    data-i18n="labelColor"
+                >
+                    สีประจำวิชา
+                </label>
+
+                <div class="flex items-center gap-3">
+
+                    <input
+                        type="color"
+                        id="course-color"
+                        value="#3b82f6"
+                        class="w-10 h-9"
+                    >
+
+                    <span
+                        class="text-xs text-gray-500 dark:text-gray-400"
+                        data-i18n="labelColorSub"
+                    >
+                        ใช้จำแนกวิชาในการแสดงผล
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label
+                    class="block text-xs font-semibold mb-1"
+                    data-i18n="labelDesc"
+                >
+                    รายละเอียดวิชา
+                </label>
+
+                <textarea
+                    id="course-desc"
+                    rows="2"
+                    placeholder="คำอธิบาย..."
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                ></textarea>
+
+            </div>
+
+
+            <div class="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-2">
+
+                <button
+                    type="button"
+                    onclick="closeCourseModal()"
+                    class="px-4 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    data-i18n="btnCancel"
+                >
+                    ยกเลิก
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white"
+                    data-i18n="btnSave"
+                >
+                    บันทึกข้อมูล
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     LESSONS MODAL
+========================================================== -->
+
+<div
+    id="lessons-modal"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+>
+
+    <div class="bg-white dark:bg-[#18181c] border border-gray-200 dark:border-[#2a2a30] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+
+        <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+
+            <div>
+
+                <div class="flex items-center gap-2">
+
+                    <span
+                        id="lesson-modal-code"
+                        class="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                    ></span>
+
+                    <h3
+                        id="lesson-modal-title"
+                        class="text-base font-bold"
+                    ></h3>
+
+                </div>
+
+                <p
+                    class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                    data-i18n="lessonModalSub"
+                >
+                    จัดการบทเรียน ตรวจสอบสถานะ และจดบันทึกย่อ
+                </p>
+
+            </div>
+
+
+            <button
+                onclick="closeLessonsModal()"
+                class="text-gray-400 hover:text-gray-200"
+            >
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+        </div>
+
+
+        <div class="p-4 border-b border-gray-100 dark:border-gray-800">
+
+            <form
+                onsubmit="addLesson(event)"
+                class="flex gap-2"
+            >
+
+                <input
+                    type="text"
+                    id="new-lesson-title"
+                    required
+                    placeholder="เพิ่มชื่อบทเรียนใหม่..."
+                    class="flex-grow px-3 py-2 bg-white dark:bg-[#0f0f11] border border-gray-200 dark:border-gray-700 rounded-lg text-xs"
+                >
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-lg shrink-0 flex items-center gap-1"
+                >
+
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+
+                    <span data-i18n="btnAddLesson">
+                        เพิ่มบทเรียน
+                    </span>
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <div
+            id="lessons-list"
+            class="p-5 overflow-y-auto flex-grow space-y-3"
+        ></div>
+
+
+        <div class="p-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+
+            <span
+                class="text-gray-500 dark:text-gray-400"
+                data-i18n="lessonModalProgress"
+            >
+                ความก้าวหน้าของวิชานี้
+            </span>
+
+            <span
+                id="lesson-modal-percentage"
+                class="font-bold text-blue-500"
+            >
+                0%
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     INSTALL GUIDE
+========================================================== -->
+
+<div
+    id="install-modal"
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+>
+
+    <div class="bg-white dark:bg-[#18181c] border border-gray-200 dark:border-[#2a2a30] rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+
+        <button
+            onclick="closeInstallGuide()"
+            class="absolute top-4 right-4 text-gray-400"
+        >
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+
+        <div class="text-center mb-5">
+
+            <div class="w-12 h-12 bg-black text-white font-black text-xl rounded-xl flex items-center justify-center mx-auto mb-2">
+                NLx
+            </div>
+
+            <h3
+                class="text-lg font-bold"
+                data-i18n="installGuideTitle"
+            >
+                ติดตั้ง NLx ลงหน้าจอ Home
+            </h3>
+
+            <p
+                class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                data-i18n="installGuideDesc"
+            >
+                ใช้งานเป็นแอปพลิเคชันเต็มรูปแบบได้โดยไม่ต้องผ่านเบราว์เซอร์
+            </p>
+
+        </div>
+
+
+        <div class="space-y-4 text-xs">
+
+            <div class="p-3.5 bg-gray-50 dark:bg-[#0f0f11] rounded-xl border border-gray-200 dark:border-gray-800">
+
+                <div class="font-bold text-blue-500 mb-2 flex items-center gap-1.5 text-sm">
+
+                    <i data-lucide="tablet-smartphone" class="w-4 h-4"></i>
+
+                    iPhone / iPad
+
+                </div>
+
+                <ol class="list-decimal list-inside space-y-1.5 text-gray-600 dark:text-gray-300">
+
+                    <li data-i18n="iosStep1">
+                        กด Share ใน Safari
+                    </li>
+
+                    <li data-i18n="iosStep2">
+                        เลือก "Add to Home Screen"
+                    </li>
+
+                    <li data-i18n="iosStep3">
+                        กด "Add"
+                    </li>
+
+                </ol>
+
+            </div>
+
+
+            <div class="p-3.5 bg-gray-50 dark:bg-[#0f0f11] rounded-xl border border-gray-200 dark:border-gray-800">
+
+                <div class="font-bold text-emerald-500 mb-2 flex items-center gap-1.5 text-sm">
+
+                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+
+                    Android / Chrome
+
+                </div>
+
+                <ol class="list-decimal list-inside space-y-1.5 text-gray-600 dark:text-gray-300">
+
+                    <li data-i18n="androidStep1">
+                        กดเมนูจุด 3 จุดที่มุมขวาบน
+                    </li>
+
+                    <li data-i18n="androidStep2">
+                        เลือก "Install App" หรือ "Add to Home screen"
+                    </li>
+
+                    <li data-i18n="androidStep3">
+                        กด "Install" เพื่อยืนยัน
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </div>
+
+
+        <button
+            onclick="closeInstallGuide()"
+            class="w-full mt-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-lg"
+            data-i18n="installGuideClose"
+        >
+            รับทราบแล้ว
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   NLx STUDY AI
+   Final PWA Version
+========================================================= */
+
+
+/* =========================================================
+   TRANSLATIONS
+========================================================= */
+
+const translations = {
+
+    TH: {
+
+        installBtn: "ติดตั้งแอป",
+        addCourseBtn: "เพิ่มวิชาเรียน",
+
+        dashboardTitle: "ภาพรวมการเรียน",
+
+        overallProgressLabel:
+            "ความก้าวหน้ารวมทั้งหมด",
+
+        statCourses:
+            "วิชาทั้งหมด",
+
+        statCompleted:
+            "เรียนเสร็จแล้ว",
+
+        statInProgress:
+            "กำลังเรียนอยู่",
+
+        statNotStarted:
+            "ยังไม่ได้เริ่ม",
+
+        chartTitle:
+            "สัดส่วนสถานะบทเรียน",
+
+        chartTotalLabel:
+            "บทเรียนทั้งหมด",
+
+        legendCompleted:
+            "เสร็จแล้ว",
+
+        legendInProgress:
+            "กำลังเรียน",
+
+        legendNotStarted:
+            "ยังไม่เริ่ม",
+
+        optAllCategories:
+            "หมวดหมู่ทั้งหมด",
+
+        optAllStatus:
+            "สถานะทั้งหมด",
+
+        optStatusCompleted:
+            "เรียนเสร็จสมบูรณ์",
+
+        optStatusInProgress:
+            "กำลังเรียนอยู่",
+
+        optStatusNotStarted:
+            "ยังไม่ได้เริ่ม",
+
+        emptyTitle:
+            "ไม่พบวิชาเรียน",
+
+        emptyDesc:
+            "เริ่มเพิ่มวิชาเรียนของคุณเพื่อติดตามความก้าวหน้าในการเรียนรู้ได้ทันที",
+
+        emptyBtn:
+            "+ เพิ่มวิชาใหม่",
+
+        pwaBannerSub:
+            "ใช้งานได้สะดวก รวดเร็ว แบบไม่ต้องเปิดเบราว์เซอร์",
+
+        pwaBannerBtn:
+            "วิธีติดตั้ง",
+
+        modalAddTitle:
+            "เพิ่มวิชาเรียนใหม่",
+
+        modalEditTitle:
+            "แก้ไขวิชาเรียน",
+
+        labelCode:
+            "รหัสวิชา",
+
+        labelTitle:
+            "ชื่อวิชา",
+
+        labelCategory:
+            "หมวดหมู่",
+
+        labelTargetDate:
+            "กำหนดสอบ / เรียนจบ",
+
+        labelColor:
+            "สีประจำวิชา",
+
+        labelColorSub:
+            "ใช้จำแนกวิชาในการแสดงผล",
+
+        labelDesc:
+            "รายละเอียดวิชา",
+
+        btnCancel:
+            "ยกเลิก",
+
+        btnSave:
+            "บันทึกข้อมูล",
+
+        lessonModalSub:
+            "จัดการบทเรียน ตรวจสอบสถานะ และจดบันทึกย่อ",
+
+        btnAddLesson:
+            "เพิ่มบทเรียน",
+
+        lessonModalProgress:
+            "ความก้าวหน้าของวิชานี้",
+
+        statusNotStarted:
+            "ยังไม่ได้เริ่ม",
+
+        statusInProgress:
+            "กำลังเรียนอยู่",
+
+        statusCompleted:
+            "เรียนเสร็จแล้ว",
+
+        lessonsCount:
+            "บทเรียน",
+
+        addNote:
+            "เพิ่มบันทึกย่อ...",
+
+        manageLessonsBtn:
+            "จัดการบทเรียน",
+
+        noLessons:
+            "ยังไม่มีบทเรียน คลิกปุ่มด้านบนเพื่อเพิ่มบทเรียนแรก",
+
+        installGuideTitle:
+            "ติดตั้ง NLx ลงหน้าจอ Home",
+
+        installGuideDesc:
+            "ใช้งานเป็นแอปพลิเคชันเต็มรูปแบบได้โดยไม่ต้องผ่านเบราว์เซอร์",
+
+        iosStep1:
+            "กด Share ใน Safari",
+
+        iosStep2:
+            'เลือก "Add to Home Screen"',
+
+        iosStep3:
+            'กด "Add"',
+
+        androidStep1:
+            "กดเมนูจุด 3 จุดที่มุมขวาบน",
+
+        androidStep2:
+            'เลือก "Install App" หรือ "Add to Home screen"',
+
+        androidStep3:
+            'กด "Install" เพื่อยืนยัน',
+
+        installGuideClose:
+            "รับทราบแล้ว",
+
+        confirmDeleteCourse:
+            "คุณต้องการลบวิชานี้ใช่หรือไม่? บทเรียนทั้งหมดจะถูกลบไปด้วย",
+
+        confirmDeleteLesson:
+            "ลบบทเรียนนี้หรือไม่?"
+    },
+
+
+    EN: {
+
+        installBtn:
+            "Install App",
+
+        addCourseBtn:
+            "Add Course",
+
+        dashboardTitle:
+            "Learning Analytics",
+
+        overallProgressLabel:
+            "Total Overall Progress",
+
+        statCourses:
+            "Total Courses",
+
+        statCompleted:
+            "Completed",
+
+        statInProgress:
+            "In Progress",
+
+        statNotStarted:
+            "Not Started",
+
+        chartTitle:
+            "Lesson Breakdown",
+
+        chartTotalLabel:
+            "Total Lessons",
+
+        legendCompleted:
+            "Completed",
+
+        legendInProgress:
+            "In Progress",
+
+        legendNotStarted:
+            "Not Started",
+
+        optAllCategories:
+            "All Categories",
+
+        optAllStatus:
+            "All Status",
+
+        optStatusCompleted:
+            "Completed",
+
+        optStatusInProgress:
+            "In Progress",
+
+        optStatusNotStarted:
+            "Not Started",
+
+        emptyTitle:
+            "No Courses Found",
+
+        emptyDesc:
+            "Start adding your courses to track your learning progression.",
+
+        emptyBtn:
+            "+ Add New Course",
+
+        pwaBannerSub:
+            "Install for fast access without opening the browser.",
+
+        pwaBannerBtn:
+            "How to Install",
+
+        modalAddTitle:
+            "Add New Course",
+
+        modalEditTitle:
+            "Edit Course",
+
+        labelCode:
+            "Course Code",
+
+        labelTitle:
+            "Course Title",
+
+        labelCategory:
+            "Category",
+
+        labelTargetDate:
+            "Target / Exam Date",
+
+        labelColor:
+            "Theme Color",
+
+        labelColorSub:
+            "Used to distinguish this course",
+
+        labelDesc:
+            "Description",
+
+        btnCancel:
+            "Cancel",
+
+        btnSave:
+            "Save Changes",
+
+        lessonModalSub:
+            "Manage lessons, check progress and add notes.",
+
+        btnAddLesson:
+            "Add Lesson",
+
+        lessonModalProgress:
+            "Course Progress",
+
+        statusNotStarted:
+            "Not Started",
+
+        statusInProgress:
+            "In Progress",
+
+        statusCompleted:
+            "Completed",
+
+        lessonsCount:
+            "Lessons",
+
+        addNote:
+            "Add notes...",
+
+        manageLessonsBtn:
+            "Manage Lessons",
+
+        noLessons:
+            "No lessons yet. Add your first lesson above.",
+
+        installGuideTitle:
+            "Install NLx to Home Screen",
+
+        installGuideDesc:
+            "Use NLx as a standalone application.",
+
+        iosStep1:
+            "Tap Share in Safari",
+
+        iosStep2:
+            'Select "Add to Home Screen"',
+
+        iosStep3:
+            'Tap "Add"',
+
+        androidStep1:
+            "Tap the three-dot menu",
+
+        androidStep2:
+            'Select "Install App" or "Add to Home screen"',
+
+        androidStep3:
+            'Tap "Install" to confirm',
+
+        installGuideClose:
+            "Got it",
+
+        confirmDeleteCourse:
+            "Are you sure you want to delete this course and all its lessons?",
+
+        confirmDeleteLesson:
+            "Delete this lesson?"
+    }
+
+};
+
+
+/* =========================================================
+   DEFAULT DATA
+========================================================= */
+
+const defaultCourses = [
+
+    {
+        id: "c1",
+
+        code: "AI101",
+
+        title:
+            "พื้นฐานเทคโนโลยีปัญญาประดิษฐ์",
+
+        category:
+            "Artificial Intelligence",
+
+        color:
+            "#3b82f6",
+
+        targetDate:
+            "2026-10-15",
+
+        description:
+            "เรียนรู้มโนทัศน์เบื้องต้นเกี่ยวกับ AI, Machine Learning และ Deep Learning",
+
+        lessons: [
+
+            {
+                id: "l1",
+
+                title:
+                    "บทนำสู่โลกแห่ง AI และประวัติศาสตร์",
+
+                status:
+                    "COMPLETED",
+
+                note:
+                    "ทบทวนเรื่อง Turing Test"
+            },
+
+            {
+                id: "l2",
+
+                title:
+                    "ความแตกต่างระหว่าง Supervised & Unsupervised Learning",
+
+                status:
+                    "IN_PROGRESS",
+
+                note:
+                    ""
+            },
+
+            {
+                id: "l3",
+
+                title:
+                    "การประยุกต์ใช้ AI ในภาคอุตสาหกรรมยุคใหม่",
+
+                status:
+                    "NOT_STARTED",
+
+                note:
+                    ""
+            }
+
+        ]
+    },
+
+
+    {
+        id: "c2",
+
+        code: "PY201",
+
+        title:
+            "Python สำหรับ Data Science & ML",
+
+        category:
+            "Programming",
+
+        color:
+            "#10b981",
+
+        targetDate:
+            "2026-11-01",
+
+        description:
+            "การใช้ NumPy, Pandas และ Scikit-Learn ในการจัดการข้อมูลและสร้างโมเดล",
+
+        lessons: [
+
+            {
+                id: "l4",
+
+                title:
+                    "การจัดการ DataFrame ด้วย Pandas",
+
+                status:
+                    "COMPLETED",
+
+                note:
+                    "จำคำสั่ง groupby"
+            },
+
+            {
+                id: "l5",
+
+                title:
+                    "Data Visualization ด้วย Seaborn & Matplotlib",
+
+                status:
+                    "COMPLETED",
+
+                note:
+                    ""
+            },
+
+            {
+                id: "l6",
+
+                title:
+                    "การสร้างโมเดล Linear Regression ตัวแรก",
+
+                status:
+                    "IN_PROGRESS",
+
+                note:
+                    "ทำแบบฝึกหัดท้ายบท"
+            }
+
+        ]
+    }
+
+];
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentLang =
+    localStorage.getItem("nelox_lang") || "TH";
+
+let courses =
+    loadCourses();
+
+let activeCourseIdForLessons =
+    null;
+
+let deferredPrompt =
+    null;
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function loadCourses() {
+
+    try {
+
+        const saved =
+            localStorage.getItem("nelox_courses");
+
+        if (saved) {
+
+            const parsed =
+                JSON.parse(saved);
+
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load courses:",
+            error
+        );
+
+    }
+
+    return structuredClone(defaultCourses);
+}
+
+
+function saveData() {
+
+    localStorage.setItem(
+        "nelox_courses",
+        JSON.stringify(courses)
+    );
+
+    localStorage.setItem(
+        "nelox_lang",
+        currentLang
+    );
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function t(key) {
+
+    return (
+        translations[currentLang][key] ??
+        key
+    );
+
+}
+
+
+function escapeHTML(value = "") {
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll('"', "&quot;")
+
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function generateId(prefix) {
+
+    return (
+        `${prefix}_${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2, 7)}`
+    );
+
+}
+
+
+function getCourseProgress(course) {
+
+    if (!course.lessons?.length) {
+        return 0;
+    }
+
+    const completed =
+        course.lessons.filter(
+            lesson =>
+                lesson.status === "COMPLETED"
+        ).length;
+
+    return Math.round(
+        (completed / course.lessons.length) * 100
+    );
+
+}
+
+
+function getCourseStatus(course) {
+
+    const progress =
+        getCourseProgress(course);
+
+    if (progress === 100) {
+        return "COMPLETED";
+    }
+
+    if (progress > 0) {
+        return "IN_PROGRESS";
+    }
+
+    return "NOT_STARTED";
+}
+
+
+/* =========================================================
+   LANGUAGE
+========================================================= */
+
+function toggleLanguage() {
+
+    currentLang =
+        currentLang === "TH"
+            ? "EN"
+            : "TH";
+
+    saveData();
+
+    updateLanguageUI();
+
+    renderCourses();
+
+    if (activeCourseIdForLessons) {
+        renderLessonsList();
+    }
+
+}
+
+
+function updateLanguageUI() {
+
+    document.documentElement.lang =
+        currentLang === "TH"
+            ? "th"
+            : "en";
+
+    document.getElementById(
+        "current-lang-text"
+    ).textContent =
+        currentLang;
+
+
+    document
+        .querySelectorAll("[data-i18n]")
+        .forEach(element => {
+
+            const key =
+                element.dataset.i18n;
+
+            if (
+                translations[currentLang][key]
+            ) {
+
+                element.textContent =
+                    translations[currentLang][key];
+
+            }
+
+        });
+
+
+    updateModalTitle();
+
+
+    const search =
+        document.getElementById(
+            "search-input"
+        );
+
+    search.placeholder =
+        currentLang === "TH"
+            ? "ค้นหาวิชาเรียน รหัสวิชา..."
+            : "Search course or code...";
+
+
+    const lessonInput =
+        document.getElementById(
+            "new-lesson-title"
+        );
+
+    lessonInput.placeholder =
+        currentLang === "TH"
+            ? "เพิ่มชื่อบทเรียนใหม่..."
+            : "Add a new lesson...";
+}
+
+
+/* =========================================================
+   THEME
+========================================================= */
+
+function toggleTheme() {
+
+    const isDark =
+        document.documentElement.classList.toggle(
+            "dark"
+        );
+
+    localStorage.setItem(
+        "nelox_theme",
+        isDark
+            ? "dark"
+            : "light"
+    );
+
+}
+
+
+function applyTheme() {
+
+    const theme =
+        localStorage.getItem(
+            "nelox_theme"
+        ) || "dark";
+
+    document.documentElement.classList.toggle(
+        "dark",
+        theme === "dark"
+    );
+
+}
+
+
+/* =========================================================
+   CATEGORY FILTER
+========================================================= */
+
+function updateCategoryFilterOptions() {
+
+    const select =
+        document.getElementById(
+            "category-filter"
+        );
+
+    const currentValue =
+        select.value;
+
+    const categories = [
+        ...new Set(
+            courses
+                .map(
+                    course =>
+                        course.category?.trim()
+                )
+                .filter(Boolean)
+        )
+    ].sort();
+
+
+    select.innerHTML = "";
+
+
+    const all =
+        document.createElement("option");
+
+    all.value = "ALL";
+
+    all.textContent =
+        t("optAllCategories");
+
+    select.appendChild(all);
+
+
+    categories.forEach(category => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            category;
+
+        option.textContent =
+            category;
+
+        select.appendChild(option);
+
+    });
+
+
+    if (
+        currentValue === "ALL" ||
+        categories.includes(currentValue)
+    ) {
+
+        select.value =
+            currentValue;
+
+    } else {
+
+        select.value =
+            "ALL";
+
+    }
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function updateDashboardStats() {
+
+    const totalCourses =
+        courses.length;
+
+    let totalLessons = 0;
+    let completed = 0;
+    let inProgress = 0;
+    let notStarted = 0;
+
+
+    courses.forEach(course => {
+
+        (course.lessons || [])
+            .forEach(lesson => {
+
+                totalLessons++;
+
+                if (
+                    lesson.status ===
+                    "COMPLETED"
+                ) {
+
+                    completed++;
+
+                } else if (
+                    lesson.status ===
+                    "IN_PROGRESS"
+                ) {
+
+                    inProgress++;
+
+                } else {
+
+                    notStarted++;
+
+                }
+
+            });
+
+    });
+
+
+    const progress =
+        totalLessons > 0
+            ? Math.round(
+                (completed /
+                    totalLessons) *
+                100
+            )
+            : 0;
+
+
+    document.getElementById(
+        "stat-total-courses"
+    ).textContent =
+        totalCourses;
+
+
+    document.getElementById(
+        "stat-completed-lessons"
+    ).textContent =
+        completed;
+
+
+    document.getElementById(
+        "stat-in-progress-lessons"
+    ).textContent =
+        inProgress;
+
+
+    document.getElementById(
+        "stat-not-started-lessons"
+    ).textContent =
+        notStarted;
+
+
+    document.getElementById(
+        "overall-percentage-text"
+    ).textContent =
+        `${progress}%`;
+
+
+    document.getElementById(
+        "overall-badge"
+    ).textContent =
+        `${progress}% ${t(
+            "statCompleted"
+        )}`;
+
+
+    document.getElementById(
+        "overall-progress-bar"
+    ).style.width =
+        `${progress}%`;
+
+
+    document.getElementById(
+        "chart-total-count"
+    ).textContent =
+        totalLessons;
+
+
+    const completedPct =
+        totalLessons
+            ? completed /
+                totalLessons *
+                100
+            : 0;
+
+
+    const inProgressPct =
+        totalLessons
+            ? inProgress /
+                totalLessons *
+                100
+            : 0;
+
+
+    const notStartedPct =
+        totalLessons
+            ? notStarted /
+                totalLessons *
+                100
+            : 0;
+
+
+    setChartSegment(
+        "chart-segment-completed",
+        completedPct,
+        0
+    );
+
+
+    setChartSegment(
+        "chart-segment-in-progress",
+        inProgressPct,
+        completedPct
+    );
+
+
+    setChartSegment(
+        "chart-segment-not-started",
+        notStartedPct,
+        completedPct +
+            inProgressPct
+    );
+
+}
+
+
+function setChartSegment(
+    id,
+    percentage,
+    offset
+) {
+
+    const element =
+        document.getElementById(id);
+
+    element.setAttribute(
+        "stroke-dasharray",
+        `${percentage}, 100`
+    );
+
+    element.setAttribute(
+        "stroke-dashoffset",
+        `-${offset}`
+    );
+
+}
+
+
+/* =========================================================
+   COURSE RENDER
+========================================================= */
+
+function renderCourses() {
+
+    const grid =
+        document.getElementById(
+            "courses-grid"
+        );
+
+    const empty =
+        document.getElementById(
+            "empty-state"
+        );
+
+
+    updateCategoryFilterOptions();
+
+    updateDashboardStats();
+
+
+    const searchValue =
+        document.getElementById(
+            "search-input"
+        )
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const category =
+        document.getElementById(
+            "category-filter"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "status-filter"
+        ).value;
+
+
+    const filtered =
+        courses.filter(course => {
+
+            const searchable =
+                `${course.code} ${
+                    course.title
+                } ${
+                    course.category || ""
+                }`
+                    .toLowerCase();
+
+
+            const matchesSearch =
+                !searchValue ||
+                searchable.includes(
+                    searchValue
+                );
+
+
+            const matchesCategory =
+                category === "ALL" ||
+                course.category ===
+                    category;
+
+
+            const matchesStatus =
+                status === "ALL" ||
+                getCourseStatus(course) ===
+                    status;
+
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesStatus
+            );
+
+        });
+
+
+    grid.innerHTML = "";
+
+
+    if (!filtered.length) {
+
+        empty.classList.remove(
+            "hidden"
+        );
+
+        empty.classList.add(
+            "flex"
+        );
+
+        refreshIcons();
+
+        return;
+
+    }
+
+
+    empty.classList.add(
+        "hidden"
+    );
+
+    empty.classList.remove(
+        "flex"
+    );
+
+
+    filtered.forEach(course => {
+
+        grid.appendChild(
+            createCourseCard(course)
+        );
+
+    });
+
+
+    refreshIcons();
+
+}
+
+
+function createCourseCard(course) {
+
+    const progress =
+        getCourseProgress(course);
+
+    const lessons =
+        course.lessons || [];
+
+
+    const completed =
+        lessons.filter(
+            lesson =>
+                lesson.status ===
+                "COMPLETED"
+        ).length;
+
+
+    const color =
+        course.color ||
+        "#3b82f6";
+
+
+    let badgeClass =
+        "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+
+
+    let badgeText =
+        t("statusNotStarted");
+
+
+    if (progress === 100) {
+
+        badgeClass =
+            "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300";
+
+        badgeText =
+            t("statusCompleted");
+
+    } else if (progress > 0) {
+
+        badgeClass =
+            "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300";
+
+        badgeText =
+            t("statusInProgress");
+
+    }
+
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+
+    card.className =
+        "bg-white dark:bg-[#18181c] rounded-2xl border border-gray-200 dark:border-[#2a2a30] p-5 shadow-sm hover:shadow-md transition-all flex flex-col relative overflow-hidden group";
+
+
+    card.innerHTML = `
+
+        <div
+            class="absolute top-0 left-0 right-0 h-1.5"
+            style="background:${escapeHTML(color)}"
+        ></div>
+
+
+        <div class="flex items-start justify-between gap-3 mb-3 pt-1">
+
+            <div class="min-w-0">
+
+                <span
+                    class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider"
+                    style="background:${escapeHTML(color)}20;color:${escapeHTML(color)}"
+                >
+                    ${escapeHTML(course.code)}
+                </span>
+
+
+                <h3 class="text-base font-bold mt-1.5 line-clamp-2 group-hover:text-blue-500">
+                    ${escapeHTML(course.title)}
+                </h3>
+
+
+                <span
+                    class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] ${badgeClass}"
+                >
+                    ${escapeHTML(badgeText)}
+                </span>
+
+            </div>
+
+
+            <div class="flex items-center gap-1 shrink-0">
+
+                <button
+                    onclick="openCourseModal('${escapeHTML(course.id)}')"
+                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    aria-label="Edit"
+                >
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+
+
+                <button
+                    onclick="deleteCourse('${escapeHTML(course.id)}')"
+                    class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40"
+                    aria-label="Delete"
+                >
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 min-h-[32px]">
+            ${escapeHTML(course.description || "-")}
+        </p>
+
+
+        <div class="space-y-1.5 mb-4 bg-gray-50 dark:bg-[#0f0f11] p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+
+            <div class="flex justify-between text-xs">
+
+                <span class="text-gray-500 font-medium">
+                    ${completed}/${lessons.length}
+                    ${t("lessonsCount")}
+                </span>
+
+                <span class="font-bold text-blue-500">
+                    ${progress}%
+                </span>
+
+            </div>
+
+
+            <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+                <div
+                    class="h-full rounded-full transition-all duration-300"
+                    style="width:${progress}%;background:${escapeHTML(color)}"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-2 text-xs mt-auto">
+
+            <div class="flex items-center gap-1.5 text-gray-400 min-w-0">
+
+                <i
+                    data-lucide="calendar"
+                    class="w-3.5 h-3.5 shrink-0"
+                ></i>
+
+                <span class="truncate">
+                    ${escapeHTML(
+                        course.targetDate ||
+                        "-"
+                    )}
+                </span>
+
+            </div>
+
+
+            <button
+                onclick="openLessonsModal('${escapeHTML(course.id)}')"
+                class="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 shrink-0"
+            >
+
+                <i
+                    data-lucide="list-checks"
+                    class="w-3.5 h-3.5"
+                ></i>
+
+                <span>
+                    ${t("manageLessonsBtn")}
+                </span>
+
+            </button>
+
+        </div>
+
+    `;
+
+
+    return card;
+
+}
+
+
+/* =========================================================
+   FILTER RESET
+========================================================= */
+
+function resetFilters() {
+
+    document.getElementById(
+        "search-input"
+    ).value = "";
+
+    document.getElementById(
+        "category-filter"
+    ).value = "ALL";
+
+    document.getElementById(
+        "status-filter"
+    ).value = "ALL";
+
+
+    renderCourses();
+
+}
+
+
+/* =========================================================
+   COURSE MODAL
+========================================================= */
+
+function updateModalTitle(edit = null) {
+
+    const title =
+        edit === true
+            ? t("modalEditTitle")
+            : t("modalAddTitle");
+
+
+    document.getElementById(
+        "modal-title"
+    ).innerHTML = `
+
+        <i
+            data-lucide="${edit ? "edit-3" : "book-plus"}"
+            class="w-5 h-5 text-blue-500"
+        ></i>
+
+        <span>
+            ${title}
+        </span>
+
+    `;
+
+
+    refreshIcons();
+
+}
+
+
+function openCourseModal(courseId = null) {
+
+    const form =
+        document.getElementById(
+            "course-form"
+        );
+
+
+    form.reset();
+
+
+    document.getElementById(
+        "course-id"
+    ).value = "";
+
+
+    if (courseId) {
+
+        const course =
+            courses.find(
+                item =>
+                    item.id ===
+                    courseId
+            );
+
+
+        if (!course) {
+            return;
+        }
+
+
+        document.getElementById(
+            "course-id"
+        ).value =
+            course.id;
+
+
+        document.getElementById(
+            "course-code"
+        ).value =
+            course.code;
+
+
+        document.getElementById(
+            "course-title"
+        ).value =
+            course.title;
+
+
+        document.getElementById(
+            "course-category"
+        ).value =
+            course.category || "";
+
+
+        document.getElementById(
+            "course-target-date"
+        ).value =
+            course.targetDate || "";
+
+
+        document.getElementById(
+            "course-color"
+        ).value =
+            course.color ||
+            "#3b82f6";
+
+
+        document.getElementById(
+            "course-desc"
+        ).value =
+            course.description || "";
+
+
+        updateModalTitle(true);
+
+    } else {
+
+        document.getElementById(
+            "course-color"
+        ).value =
+            "#3b82f6";
+
+
+        updateModalTitle(false);
+
+    }
+
+
+    document.getElementById(
+        "course-modal"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    document.getElementById(
+        "course-code"
+    ).focus();
+
+}
+
+
+function closeCourseModal() {
+
+    document.getElementById(
+        "course-modal"
+    ).classList.add(
+        "hidden"
+    );
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+function saveCourse(event) {
+
+    event.preventDefault();
+
+
+    const id =
+        document.getElementById(
+            "course-id"
+        ).value;
+
+
+    const data = {
+
+        code:
+            document.getElementById(
+                "course-code"
+            ).value.trim(),
+
+        title:
+            document.getElementById(
+                "course-title"
+            ).value.trim(),
+
+        category:
+            document.getElementById(
+                "course-category"
+            ).value.trim(),
+
+        targetDate:
+            document.getElementById(
+                "course-target-date"
+            ).value,
+
+        color:
+            document.getElementById(
+                "course-color"
+            ).value,
+
+        description:
+            document.getElementById(
+                "course-desc"
+            ).value.trim()
+
+    };
+
+
+    if (
+        !data.code ||
+        !data.title
+    ) {
+        return;
+    }
+
+
+    if (id) {
+
+        const index =
+            courses.findIndex(
+                course =>
+                    course.id ===
+                    id
+            );
+
+
+        if (index !== -1) {
+
+            courses[index] = {
+
+                ...courses[index],
+
+                ...data
+
+            };
+
+        }
+
+    } else {
+
+        courses.unshift({
+
+            id:
+                generateId(
+                    "course"
+                ),
+
+            ...data,
+
+            lessons: []
+
+        });
+
+    }
+
+
+    saveData();
+
+    closeCourseModal();
+
+    renderCourses();
+
+}
+
+
+function deleteCourse(courseId) {
+
+    if (
+        !confirm(
+            t(
+                "confirmDeleteCourse"
+            )
+        )
+    ) {
+        return;
+    }
+
+
+    courses =
+        courses.filter(
+            course =>
+                course.id !==
+                courseId
+        );
+
+
+    saveData();
+
+    renderCourses();
+
+}
+
+
+/* =========================================================
+   LESSON MODAL
+========================================================= */
+
+function openLessonsModal(courseId) {
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                courseId
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    activeCourseIdForLessons =
+        courseId;
+
+
+    document.getElementById(
+        "lesson-modal-code"
+    ).textContent =
+        course.code;
+
+
+    document.getElementById(
+        "lesson-modal-title"
+    ).textContent =
+        course.title;
+
+
+    renderLessonsList();
+
+
+    document.getElementById(
+        "lessons-modal"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+function closeLessonsModal() {
+
+    activeCourseIdForLessons =
+        null;
+
+
+    document.getElementById(
+        "lessons-modal"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+
+    renderCourses();
+
+}
+
+
+function renderLessonsList() {
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                activeCourseIdForLessons
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    const list =
+        document.getElementById(
+            "lessons-list"
+        );
+
+
+    list.innerHTML = "";
+
+
+    const lessons =
+        course.lessons || [];
+
+
+    if (!lessons.length) {
+
+        list.innerHTML = `
+
+            <div class="text-center py-8 text-xs text-gray-400">
+
+                ${escapeHTML(
+                    t("noLessons")
+                )}
+
+            </div>
+
+        `;
+
+
+        document.getElementById(
+            "lesson-modal-percentage"
+        ).textContent =
+            "0%";
+
+
+        return;
+
+    }
+
+
+    lessons.forEach(lesson => {
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+
+        item.className =
+            "p-3 bg-gray-50 dark:bg-[#0f0f11] rounded-xl border border-gray-200 dark:border-gray-800 space-y-2";
+
+
+        item.innerHTML = `
+
+            <div class="flex items-center justify-between gap-2">
+
+                <div class="flex items-center gap-2 flex-grow min-w-0">
+
+                    <span class="font-semibold text-xs break-words">
+
+                        ${escapeHTML(
+                            lesson.title
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                <div class="flex items-center gap-2 shrink-0">
+
+                    <select
+                        onchange="updateLessonStatus('${escapeHTML(lesson.id)}', this.value)"
+                        class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-white dark:bg-[#18181c] border border-gray-200 dark:border-gray-700"
+                    >
+
+                        <option
+                            value="NOT_STARTED"
+                            ${
+                                lesson.status ===
+                                "NOT_STARTED"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${t(
+                                "statusNotStarted"
+                            )}
+                        </option>
+
+
+                        <option
+                            value="IN_PROGRESS"
+                            ${
+                                lesson.status ===
+                                "IN_PROGRESS"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${t(
+                                "statusInProgress"
+                            )}
+                        </option>
+
+
+                        <option
+                            value="COMPLETED"
+                            ${
+                                lesson.status ===
+                                "COMPLETED"
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${t(
+                                "statusCompleted"
+                            )}
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        onclick="deleteLesson('${escapeHTML(lesson.id)}')"
+                        class="p-1 text-gray-400 hover:text-red-500"
+                    >
+
+                        <i
+                            data-lucide="trash-2"
+                            class="w-3.5 h-3.5"
+                        ></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <input
+                type="text"
+                value="${escapeHTML(
+                    lesson.note || ""
+                )}"
+                onchange="updateLessonNote('${escapeHTML(lesson.id)}', this.value)"
+                placeholder="${escapeHTML(
+                    t("addNote")
+                )}"
+                class="w-full px-2.5 py-1 bg-white dark:bg-[#18181c] border border-gray-200 dark:border-gray-800 rounded text-[11px] text-gray-500 focus:outline-none focus:border-blue-500"
+            />
+
+        `;
+
+
+        list.appendChild(item);
+
+    });
+
+
+    document.getElementById(
+        "lesson-modal-percentage"
+    ).textContent =
+        `${getCourseProgress(course)}%`;
+
+
+    refreshIcons();
+
+}
+
+
+function addLesson(event) {
+
+    event.preventDefault();
+
+
+    const input =
+        document.getElementById(
+            "new-lesson-title"
+        );
+
+
+    const title =
+        input.value.trim();
+
+
+    if (
+        !title ||
+        !activeCourseIdForLessons
+    ) {
+        return;
+    }
+
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                activeCourseIdForLessons
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    if (!course.lessons) {
+        course.lessons = [];
+    }
+
+
+    course.lessons.push({
+
+        id:
+            generateId(
+                "lesson"
+            ),
+
+        title,
+
+        status:
+            "NOT_STARTED",
+
+        note:
+            ""
+
+    });
+
+
+    input.value = "";
+
+
+    saveData();
+
+    renderLessonsList();
+
+}
+
+
+function updateLessonStatus(
+    lessonId,
+    status
+) {
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                activeCourseIdForLessons
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    const lesson =
+        course.lessons.find(
+            item =>
+                item.id ===
+                lessonId
+        );
+
+
+    if (!lesson) {
+        return;
+    }
+
+
+    lesson.status =
+        status;
+
+
+    saveData();
+
+    renderLessonsList();
+
+}
+
+
+function updateLessonNote(
+    lessonId,
+    note
+) {
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                activeCourseIdForLessons
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    const lesson =
+        course.lessons.find(
+            item =>
+                item.id ===
+                lessonId
+        );
+
+
+    if (!lesson) {
+        return;
+    }
+
+
+    lesson.note =
+        note;
+
+
+    saveData();
+
+}
+
+
+function deleteLesson(lessonId) {
+
+    if (
+        !confirm(
+            t(
+                "confirmDeleteLesson"
+            )
+        )
+    ) {
+        return;
+    }
+
+
+    const course =
+        courses.find(
+            item =>
+                item.id ===
+                activeCourseIdForLessons
+        );
+
+
+    if (!course) {
+        return;
+    }
+
+
+    course.lessons =
+        course.lessons.filter(
+            lesson =>
+                lesson.id !==
+                lessonId
+        );
+
+
+    saveData();
+
+    renderLessonsList();
+
+}
+
+
+/* =========================================================
+   PWA INSTALL
+========================================================= */
+
+async function installApp() {
+
+    if (deferredPrompt) {
+
+        deferredPrompt.prompt();
+
+        try {
+
+            await deferredPrompt.userChoice;
+
+        } catch (error) {
+
+            console.warn(
+                error
+            );
+
+        }
+
+        deferredPrompt =
+            null;
+
+        return;
+    }
+
+
+    document.getElementById(
+        "install-modal"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    refreshIcons();
+
+}
+
+
+function closeInstallGuide() {
+
+    document.getElementById(
+        "install-modal"
+    ).classList.add(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+async function registerServiceWorker() {
+
+    if (
+        !("serviceWorker" in navigator)
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const registration =
+            await navigator.serviceWorker.register(
+                "./sw.js",
+                {
+                    scope: "./"
+                }
+            );
+
+
+        console.log(
+            "NLx Service Worker registered:",
+            registration.scope
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Service Worker registration failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ICONS
+========================================================= */
+
+function refreshIcons() {
+
+    if (
+        window.lucide &&
+        typeof lucide.createIcons ===
+            "function"
+    ) {
+
+        lucide.createIcons();
+
+    }
+
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+            return;
+        }
+
+
+        if (
+            !document
+                .getElementById(
+                    "course-modal"
+                )
+                .classList.contains(
+                    "hidden"
+                )
+        ) {
+
+            closeCourseModal();
+
+        }
+
+
+        if (
+            !document
+                .getElementById(
+                    "lessons-modal"
+                )
+                .classList.contains(
+                    "hidden"
+                )
+        ) {
+
+            closeLessonsModal();
+
+        }
+
+
+        if (
+            !document
+                .getElementById(
+                    "install-modal"
+                )
+                .classList.contains(
+                    "hidden"
+                )
+        ) {
+
+            closeInstallGuide();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+        applyTheme();
+
+        updateLanguageUI();
+
+        renderCourses();
+
+        refreshIcons();
+
+        await registerServiceWorker();
+
+
+        window.addEventListener(
+            "beforeinstallprompt",
+            event => {
+
+                event.preventDefault();
+
+                deferredPrompt =
+                    event;
+
+
+                document
+                    .getElementById(
+                        "pwa-install-btn"
+                    )
+                    .classList.remove(
+                        "hidden"
+                    );
+
+            }
+        );
+
+
+        window.addEventListener(
+            "appinstalled",
+            () => {
+
+                deferredPrompt =
+                    null;
+
+
+                document
+                    .getElementById(
+                        "pwa-install-btn"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
